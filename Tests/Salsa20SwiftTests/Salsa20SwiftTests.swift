@@ -1,8 +1,11 @@
-import XCTest
+import Foundation
+import Testing
 @testable import Salsa20Swift
 
-final class Salsa20SwiftTests: XCTestCase {
-    func testFirstBlockMatchesReferenceVector() throws {
+@Suite
+struct Salsa20SwiftTests {
+    @Test
+    func firstBlockMatchesReferenceVector() throws {
         let key = Data((0..<32).map(UInt8.init))
         let nonce = Data(repeating: 0, count: 8)
         let cipher = try Salsa20Cipher(key: key, nonce: nonce)
@@ -10,10 +13,11 @@ final class Salsa20SwiftTests: XCTestCase {
         let result = cipher.process(Data(repeating: 0, count: 64))
         let expected = Data(hex: "b580f7671c76e5f7441af87c146d6b513910dc8b4146ef1b3211cf12af4a4b49e5c874b3ef4f85e7d7ed539ffeba73eb73e0cca74fbd306d8aa716c7783e89af")
 
-        XCTAssertEqual(result, expected)
+        #expect(result == expected)
     }
 
-    func testTwoBlocksMatchReferenceVector() throws {
+    @Test
+    func twoBlocksMatchReferenceVector() throws {
         let key = Data((0..<32).map(UInt8.init))
         let nonce = Data(repeating: 0, count: 8)
         let cipher = try Salsa20Cipher(key: key, nonce: nonce)
@@ -24,10 +28,11 @@ final class Salsa20SwiftTests: XCTestCase {
             "e080f82977fd81f5d5a858048c299a4eaedd2835a3b30cc6e3870cddf7387f6f60e50747c118e3d38b7e8751db02da647bde67dd2efa847b575e8e72a4afe8c8"
         )
 
-        XCTAssertEqual(result, expected)
+        #expect(result == expected)
     }
 
-    func testSalsa20_128Vectors() throws {
+    @Test
+    func salsa20_128Vectors() throws {
         let key = Data((0..<16).map(UInt8.init)) // 128-bit
         let nonce = Data(repeating: 0, count: 8)
         let cipher = try Salsa20Cipher(key: key, nonce: nonce)
@@ -38,10 +43,11 @@ final class Salsa20SwiftTests: XCTestCase {
             "ae17cc187c9b8260f46a62d440c845970d9dad1edb8d8575dcae006acdf6af2f1373dff1263a06b3d063f46d6f5e6e013759021419d29db03a992b2fd1c6a0cb"
         )
 
-        XCTAssertEqual(result, expected)
+        #expect(result == expected)
     }
 
-    func testEncryptDecryptRoundTrip() throws {
+    @Test
+    func encryptDecryptRoundTrip() throws {
         let key = Data(Array(0...31).map(UInt8.init))
         let nonce = Data(Array(1...8).map(UInt8.init))
         let cipher = try Salsa20Cipher(key: key, nonce: nonce, counter: 5) // non-zero counter
@@ -52,17 +58,20 @@ final class Salsa20SwiftTests: XCTestCase {
         let decryptCipher = try Salsa20Cipher(key: key, nonce: nonce, counter: 5)
         let decrypted = decryptCipher.process(encrypted)
 
-        XCTAssertEqual(decrypted, message)
+        #expect(decrypted == message)
     }
 
-    func testInvalidRoundsThrows() {
+    @Test
+    func invalidRoundsThrows() {
         let key = Data(repeating: 0, count: 32)
         let nonce = Data(repeating: 0, count: 8)
-        XCTAssertThrowsError(try Salsa20Cipher(key: key, nonce: nonce, rounds: 7))
-        XCTAssertThrowsError(try Salsa20Cipher(key: key, nonce: nonce, rounds: 0))
+
+        #expect(throws: Salsa20Error.invalidRounds) { try Salsa20Cipher(key: key, nonce: nonce, rounds: 7) }
+        #expect(throws: Salsa20Error.invalidRounds) { try Salsa20Cipher(key: key, nonce: nonce, rounds: 0) }
     }
 
-    func testLongStreamMatchesPythonReference() throws {
+    @Test
+    func longStreamMatchesPythonReference() throws {
         // Mirrors the Python test_salsa20() parity check against PyCryptodome,
         // using a deterministic key/nonce/plaintext and a 1000-byte keystream span.
         let key = Data((0..<32).map(UInt8.init))
@@ -96,7 +105,7 @@ final class Salsa20SwiftTests: XCTestCase {
             "d52304f1f9d827740d3a2f3fcf8e6022b3d0dc7f070badcd86227684753a6e4759298c11409161be"
         )
 
-        XCTAssertEqual(ciphertext, expectedCiphertext)
+        #expect(ciphertext == expectedCiphertext)
     }
 }
 
