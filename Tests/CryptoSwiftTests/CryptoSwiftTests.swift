@@ -1,9 +1,9 @@
 import Foundation
 import Testing
-@testable import Salsa20Swift
+@testable import CryptoSwift
 
 @Suite
-struct Salsa20SwiftTests {
+struct CryptoSwiftTests {
     @Test
     func firstBlockMatchesReferenceVector() throws {
         let key = Data((0..<32).map(UInt8.init))
@@ -110,18 +110,3 @@ struct Salsa20SwiftTests {
 }
 
 // MARK: - Test helpers
-
-private extension Data {
-    init(hex: String) {
-        var data = Data(capacity: hex.count / 2)
-        var index = hex.startIndex
-        while index < hex.endIndex {
-            let nextIndex = hex.index(index, offsetBy: 2)
-            let byteString = hex[index..<nextIndex]
-            let byte = UInt8(byteString, radix: 16)!
-            data.append(byte)
-            index = nextIndex
-        }
-        self = data
-    }
-}

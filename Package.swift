@@ -4,23 +4,20 @@
 import PackageDescription
 
 let package = Package(
-    name: "Salsa20Swift",
+    name: "CryptoSwift",
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "Salsa20Swift",
-            targets: ["Salsa20Swift"]
+            name: "CryptoSwift",
+            targets: ["CryptoSwift"]
         ),
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "Salsa20Swift"
+            name: "CryptoSwift"
         ),
         .testTarget(
-            name: "Salsa20SwiftTests",
-            dependencies: ["Salsa20Swift"]
+            name: "CryptoSwiftTests",
+            dependencies: ["CryptoSwift"]
         ),
     ]
 )
