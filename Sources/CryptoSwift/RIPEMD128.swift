@@ -8,6 +8,32 @@ public struct RIPEMD128 {
         return hasher.finalize()
     }
 
+    /// Decrypts data using the nibble-swap + XOR scheme from the `_fast_decrypt` helper.
+    /// The `key` is typically the RIPEMD-128 digest of some secret.
+    public static func fastDecrypt(_ data: Data, key: Data) throws -> Data {
+        guard !key.isEmpty else { throw FastDecryptError.emptyKey }
+
+        var output = [UInt8](data)
+        let keyBytes = [UInt8](key)
+        var previous: UInt8 = 0x36
+
+        for i in 0..<output.count {
+            let cipherByte = output[i]
+            let swapped = (cipherByte >> 4) | (cipherByte << 4)
+            let indexByte = UInt8(truncatingIfNeeded: i)
+            let plain = swapped ^ previous ^ indexByte ^ keyBytes[i % keyBytes.count]
+
+            previous = cipherByte
+            output[i] = plain
+        }
+
+        return Data(output)
+    }
+
+    public enum FastDecryptError: Error {
+        case emptyKey
+    }
+
     // Simple one-shot hasher; expand if streaming is ever needed.
     private struct Hasher {
         private var h0: UInt32 = 0x6745_2301
